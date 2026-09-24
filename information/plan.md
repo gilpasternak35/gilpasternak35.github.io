@@ -10,11 +10,11 @@ Contact - a field to allow people to contact me.
 
 I will proceed to detail each section below:
 
-About me - simply use the following text: "Hi, I’m Gil — currently a Member of Technical Staff at Fastino, where I work on foundational Language Model research. My interests sit at the intersection of natural language modeling, interpretability, and (some) Machine Learning theory.
+About me - simply use the following text: "Hi, I’m Gil — currently a Senior Research Scientist at Code Metal, where I work primarily on post-training and evals. My interests sit at the intersection of natural language modeling, alignment, and (some) Machine Learning theory.
 
-Previously, I was a Researcher at Loris (acquired by Contentsquare), one of the earliest core engineers at Great Expectations, and did AI research at NVIDIA. I earned my Bachelor’s in Mathematics and Computer Science and Master’s in Computer Science from UC San Diego, where I was fortunate to be advised by Misha Belkin (http://misha.belkin-wang.org) and Ramamohan Paturi (https://jacobsschool.ucsd.edu/faculty/profile?id=118).
+Previously, I was a Member of Technical Staff at Fastino, a Researcher at Loris (acquired by Contentsquare), one of the earliest core engineers at Great Expectations, and did AI research at NVIDIA. I earned my Bachelor’s in Mathematics and Computer Science and Master’s in Computer Science from UC San Diego, where I was fortunate to be advised by Misha Belkin (http://misha.belkin-wang.org) and Ramamohan Paturi (https://jacobsschool.ucsd.edu/faculty/profile?id=118).
 
-Outside of work, you can usually find me reading mechanistic interpretability papers, lifting heavy things, or getting into lengthy conversations with Uber drivers. I love chatting about interpretability, language models, or the weird quirks of language-based systems — if this is something that also interests you, reach out!"
+Outside of work, you can usually find me reading alignment papers, lifting heavy things, or getting into lengthy conversations with Uber drivers. I love chatting about alignment, language models, or the weird quirks of language-based systems — if this is something that also interests you, reach out!"
 
 Experience: Simply Embed my Resume into the page, it can be found in the information folder.
 
