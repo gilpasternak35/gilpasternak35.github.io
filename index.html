@@ -232,12 +232,86 @@
         }
 
         /* Experience Section */
-        .resume-container {
-            width: 100%;
-            height: 800px;
-            border: none;
+        .resume-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .resume-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            justify-content: flex-end;
+        }
+
+        .resume-actions a {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.55rem 1rem;
             border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .resume-actions .resume-open {
+            background: linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%);
+            color: white;
+        }
+
+        .resume-actions .resume-open:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+        }
+
+        .resume-actions .resume-download {
+            background: #f8fafc;
+            color: #1e3a8a;
+            border: 1px solid #e2e8f0;
+        }
+
+        .resume-actions .resume-download:hover {
+            background: #eef2ff;
+            border-color: #c7d2fe;
+        }
+
+        .resume-viewer {
+            width: 100%;
+            max-height: 800px;
+            overflow: auto;
+            border-radius: 8px;
+            background: #e2e8f0;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .resume-viewer canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            margin: 0 auto 1rem;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            border-radius: 4px;
+        }
+
+        .resume-viewer canvas:last-child {
+            margin-bottom: 0;
+        }
+
+        .resume-status {
+            text-align: center;
+            color: #4a5568;
+            padding: 2rem 1rem;
+            font-size: 1rem;
+        }
+
+        .resume-status.error {
+            color: #b91c1c;
         }
 
         /* Projects Section */
@@ -464,7 +538,19 @@
                 <h2>Experience</h2>
             </div>
             <div class="section-content">
-                <iframe src="information/Gil_Resume.pdf" class="resume-container"></iframe>
+                <div class="resume-wrap">
+                    <div class="resume-actions">
+                        <a class="resume-open" href="information/Gil_Resume.pdf" target="_blank" rel="noopener noreferrer">
+                            <i class="fas fa-external-link-alt"></i> Open PDF
+                        </a>
+                        <a class="resume-download" href="information/Gil_Resume.pdf" download="Gil_Pasternak_Resume.pdf">
+                            <i class="fas fa-download"></i> Download
+                        </a>
+                    </div>
+                    <div id="resume-viewer" class="resume-viewer" aria-label="Resume preview">
+                        <p class="resume-status" id="resume-status">Loading resume…</p>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -536,6 +622,7 @@
         </div>
     </footer>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script>
         // Smooth navigation highlighting
         const navLinks = document.querySelectorAll('.nav-link');
@@ -590,6 +677,80 @@
                 targetSection.scrollIntoView({ behavior: 'smooth' });
             });
         });
+
+        // Render resume with PDF.js so Safari (and mobile browsers) show pages
+        // instead of a blank native PDF iframe/plugin viewer.
+        (function renderResumeWithPdfJs() {
+            const RESUME_URL = 'information/Gil_Resume.pdf';
+            const viewer = document.getElementById('resume-viewer');
+            const status = document.getElementById('resume-status');
+
+            if (!viewer || typeof pdfjsLib === 'undefined') {
+                if (status) {
+                    status.classList.add('error');
+                    status.innerHTML = 'Unable to preview the resume here. Please <a href="' + RESUME_URL + '" target="_blank" rel="noopener noreferrer">open the PDF</a> instead.';
+                }
+                return;
+            }
+
+            pdfjsLib.GlobalWorkerOptions.workerSrc =
+                'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+            let pdfDoc = null;
+            let renderToken = 0;
+
+            function clearPages() {
+                viewer.querySelectorAll('canvas').forEach((canvas) => canvas.remove());
+            }
+
+            async function renderPages() {
+                if (!pdfDoc) return;
+
+                const token = ++renderToken;
+                const width = Math.max(viewer.clientWidth - 32, 280);
+                clearPages();
+
+                for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
+                    if (token !== renderToken) return;
+
+                    const page = await pdfDoc.getPage(pageNum);
+                    const unscaled = page.getViewport({ scale: 1 });
+                    const scale = width / unscaled.width;
+                    const viewport = page.getViewport({ scale: scale * (window.devicePixelRatio || 1) });
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+                    canvas.style.width = width + 'px';
+                    canvas.style.height = (viewport.height / (window.devicePixelRatio || 1)) + 'px';
+                    canvas.setAttribute('aria-label', 'Resume page ' + pageNum);
+
+                    viewer.appendChild(canvas);
+                    await page.render({ canvasContext: context, viewport: viewport }).promise;
+                }
+
+                if (status) status.remove();
+            }
+
+            pdfjsLib.getDocument(RESUME_URL).promise
+                .then(function (pdf) {
+                    pdfDoc = pdf;
+                    return renderPages();
+                })
+                .catch(function () {
+                    if (status) {
+                        status.classList.add('error');
+                        status.innerHTML = 'Unable to preview the resume here. Please <a href="' + RESUME_URL + '" target="_blank" rel="noopener noreferrer">open the PDF</a> instead.';
+                    }
+                });
+
+            let resizeTimer = null;
+            window.addEventListener('resize', function () {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(renderPages, 150);
+            });
+        })();
     </script>
 </body>
 </html>
